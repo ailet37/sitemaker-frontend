@@ -1,18 +1,18 @@
 <template>
   <div class="home">
     <Edit-panel
-      v-show="showPanel"
+      v-if="currentBlock"
       v-on:hide-edit-panel="hideEditPanel"
       v-on:save-data="onEditBlock"
-      :id="currentBlockId"
+      :block="currentBlock"
     ></Edit-panel>
     <Block
       v-for="block in blocks"
       :key="block._id"
-      :id="block._id"
-      :color="block.color"
+      :block="block"
+      v-on:edit-block="onEditBlock"
     >
-      <button @click="showEditPanel(block._id)">Edit block</button>
+      <button @click="showEditPanel(block)">Edit block</button>
       <button @click="removeBlock(block._id)">Delete block</button>
     </Block>
     <button @click="addNewBlock">Add new block</button>
@@ -35,61 +35,53 @@ export default {
   data() {
     return {
       blocks: [],
-      showPanel: false,
       color: '',
-      currentBlockId: null
+      currentBlock: null
     };
   },
   created() {
     this.fetchBlocks();
   },
   methods: {
-    renderSite() {},
-
-    fetchBlocks() {
-      axios
-        .get(`${server.baseURL}/blocks`)
-        .then((data) => (this.blocks = data.data));
+    async fetchBlocks() {
+      const { data } = await axios.get(`${server.baseURL}/blocks`);
+      this.blocks = data;
     },
 
-    addNewBlock() {
-      axios
-        .post(`${server.baseURL}/block`, { type: 'simple', color: '#000' })
-        .then((data) => {
-          this.blocks.push(data.data);
-        });
+    async addNewBlock() {
+      const { data } = await axios.post(`${server.baseURL}/block`, {
+        title: 'Заголовок',
+        type: 'simple',
+        color: '#000'
+      });
+      this.blocks.push(data);
     },
 
-    showEditPanel(id) {
-      this.showPanel = true;
-      this.currentBlockId = id;
+    showEditPanel(block) {
+      this.currentBlock = block;
     },
 
     hideEditPanel() {
-      this.showPanel = false;
-      this.currentBlockId = null;
+      this.currentBlock = null;
     },
 
-    removeBlock(blockId) {
-      axios.delete(`${server.baseURL}/blocks/${blockId}`).then((data) => {
-        window.location.reload();
-      });
+    async removeBlock(blockId) {
+      const { data } = await axios.delete(
+        `${server.baseURL}/blocks/${blockId}`
+      );
+      this.blocks = data;
     },
 
-    onEditBlock(color) {
-      const postData = {
-        type: 'simple',
-        color
-      };
-      axios
-        .put(`${server.baseURL}/blocks/${this.currentBlockId}`, postData)
-        .then((data) => {
-          const index = this.blocks.findIndex(
-            (block) => block._id === this.currentBlockId
-          );
-          Vue.set(this.blocks, index, data.data);
-          this.hideEditPanel();
-        });
+    async onEditBlock(blockData) {
+      const { data } = await axios.put(
+        `${server.baseURL}/blocks/${this.currentBlock._id}`,
+        blockData
+      );
+      const index = this.blocks.findIndex(
+        (block) => block._id === this.currentBlock._id
+      );
+      Vue.set(this.blocks, index, data);
+      this.hideEditPanel();
     }
   }
 };

@@ -1,16 +1,12 @@
 <template>
   <div class="edit-panel">
-    <h3>Панель редактирования блока {{ id }}</h3>
+    <h3>Панель редактирования блока {{ block._id }}</h3>
     <div class="edit-panel-prop">
       Цвет бордера:
-      <input
-        :value="color"
-        @change="currentColor = $event.target.value"
-        type="color"
-      />
+      <input @change="currentColor = $event.target.value" type="color" />
     </div>
     <button @click="$emit('hide-edit-panel')">Close</button>
-    <button @click="$emit('save-data', currentColor)">Save</button>
+    <button @click="onSave">Save</button>
   </div>
 </template>
 
@@ -29,7 +25,7 @@
 <script>
 export default {
   name: 'EditPanel',
-  props: ['color', 'id'],
+  props: ['block'],
   data() {
     return {
       currentColor: ''
@@ -38,6 +34,11 @@ export default {
   methods: {
     setColor(value) {
       this.currentColor = value;
+    },
+    onSave() {
+      const blockData = { ...this.block };
+      blockData.color = this.currentColor;
+      this.$emit('save-data', blockData);
     }
   }
 };

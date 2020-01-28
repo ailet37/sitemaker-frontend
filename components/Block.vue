@@ -1,7 +1,8 @@
 <template>
   <div :style="style" class="block">
-    {{ id }}
-
+    <h2 :title="block.title">
+      {{ block.title }}
+    </h2>
     <slot></slot>
   </div>
 </template>
@@ -18,10 +19,18 @@
 <script>
 export default {
   name: 'Block',
-  props: ['color', 'id'],
+  props: ['block'],
   computed: {
     style() {
-      return 'border-color: ' + this.color;
+      return 'border-color: ' + this.block.color;
+    }
+  },
+  methods: {
+    onChange(value) {
+      const blockData = { ...this.block };
+      blockData.title = value;
+
+      this.$emit('edit-block', blockData);
     }
   }
 };

@@ -1,11 +1,6 @@
 <template>
   <div class="home">
-    <Block
-      v-for="block in blocks"
-      :key="block._id"
-      :id="block._id"
-      :color="block.color"
-    ></Block>
+    <Block v-for="block in blocks" :key="block._id" :block="block"></Block>
     <a href="/edit">edit</a>
   </div>
 </template>
@@ -19,6 +14,7 @@ export default {
   components: {
     Block
   },
+
   data() {
     return {
       blocks: []
